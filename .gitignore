@@ -1,0 +1,20 @@
+__pycache__/
+recordings/
+.pytest_cache/
+.deps/
+.test-tmp/
+
+# Captured screens, input logs, generated graphs and evaluation data.
+/runs/
+/workflows/
+/evaluation/
+/evaluation-images/
+
+# Local credentials and environments.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.venv/
+venv/

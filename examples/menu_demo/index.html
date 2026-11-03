@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu Lab · 테스트 게임</title>
+<style>
+body{margin:0;background:#0b1320;color:#e8eef7;font:16px system-ui,sans-serif}main{max-width:1100px;margin:32px auto;padding:0 24px}h1{font-size:25px;margin-bottom:8px}p{color:#adbed4;line-height:1.6}canvas{display:block;width:100%;max-width:960px;aspect-ratio:16/9;border-radius:16px;outline:none}button,a{background:#253c57;color:#edf4ff;border:1px solid #4a6483;border-radius:8px;padding:10px 18px;font:inherit;cursor:pointer}nav{display:flex;gap:12px;margin:20px 0}#status{min-height:24px}#graph{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}.node{padding:12px;border:1px solid #4a6483;border-radius:8px}.active{border-color:#e3b66c;background:#34435a}details{margin:24px 0}pre{white-space:pre-wrap}a{text-decoration:none}
+</style>
+<main><h1>Menu Lab</h1><p>가상의 메뉴 작업입니다. 화면 속 버튼을 눌러 보상을 수령하세요. 실제 게임 기록은 아닙니다.</p>
+<canvas id="game" width="960" height="540" tabindex="0" aria-label="메뉴 게임 화면"></canvas>
+<nav><button id="reset">처음부터</button><button id="export">실행 결과 저장</button><a href="?inspect=1">검사용 그래프 열기</a></nav>
+<p id="status" role="status">불러오는 중…</p>
+<details id="inspector" hidden><summary>검사용 상태·전환 그래프</summary><p>자동화 평가에서는 이 영역과 scenario.json을 에이전트 입력으로 제공하지 마세요.</p><div id="graph"></div><pre id="trace"></pre></details></main>
+<script>
+'use strict';
+let scenario, current, history=[], ready=false;
+const canvas=document.querySelector('#game'),ctx=canvas.getContext('2d'),status=document.querySelector('#status');
+const images=new Map();
+function draw(){
+ ctx.drawImage(images.get(current),0,0,960,540);
+ status.textContent=current===scenario.success.node?'완료: 보상 수령을 확인했습니다.':'화면 속 버튼으로 진행하세요.';
+ document.querySelector('#graph').replaceChildren(...scenario.nodes.map(n=>{const el=document.createElement('span');el.className='node'+(n.id===current?' active':'');el.textContent=n.id+(n.id===scenario.success.node?' ✓':' →');return el;}));
+ document.querySelector('#trace').textContent=history.map(e=>JSON.stringify(e)).join('\n');
+}
+canvas.addEventListener('click',event=>{
+ if(!ready)return;
+ const box=canvas.getBoundingClientRect(), x=(event.clientX-box.left)*960/box.width,y=(event.clientY-box.top)*540/box.height;
+ const edge=scenario.transitions.find(e=>e.from===current&&x>=e.rect[0]&&x<e.rect[0]+e.rect[2]&&y>=e.rect[1]&&y<e.rect[1]+e.rect[3]);
+ history.push({t_ms:performance.now(),from:current,to:edge?edge.to:current,transition:edge?.id??null,x,y});
+ if(edge) current=edge.to;
+ draw();
+});
+document.querySelector('#reset').onclick=()=>{if(!ready)return;current=scenario.initial;history=[];draw();};
+document.querySelector('#export').onclick=()=>{if(!ready)return;const blob=new Blob([JSON.stringify({source:'synthetic',completed:current===scenario.success.node,history},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='menu-lab-result.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+(async()=>{try{
+ const response=await fetch('scenario.json');if(!response.ok)throw Error('Scenario load failed');scenario=await response.json();
+ await Promise.all(scenario.nodes.map(n=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{images.set(n.id,img);resolve();};img.onerror=reject;img.src=n.image;})));
+ current=scenario.initial;ready=true;document.querySelector('#inspector').hidden=!new URLSearchParams(location.search).has('inspect');draw();
+}catch(error){status.textContent='불러오기 실패. python -m game_agent demo 로 실행하세요.';console.error(error);}})();
+</script></html>

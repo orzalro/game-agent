@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "source": "synthetic",
+  "goal": "Claim the mission reward once",
+  "viewport": [
+    960,
+    540
+  ],
+  "events": "events.jsonl",
+  "initial": "menu",
+  "nodes": [
+    {
+      "id": "menu",
+      "image": "frames/menu.svg",
+      "evidence": [
+        "e000000"
+      ]
+    },
+    {
+      "id": "missions",
+      "image": "frames/missions.svg",
+      "evidence": [
+        "e000002"
+      ]
+    },
+    {
+      "id": "reward",
+      "image": "frames/reward.svg",
+      "evidence": [
+        "e000004"
+      ]
+    },
+    {
+      "id": "done",
+      "image": "frames/done.svg",
+      "evidence": [
+        "e000006"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t001",
+      "from": "menu",
+      "to": "missions",
+      "rect": [
+        300,
+        360,
+        360,
+        70
+      ],
+      "certainty": "synthetic",
+      "evidence": [
+        "e000000",
+        "e000001",
+        "e000002"
+      ]
+    },
+    {
+      "id": "t002",
+      "from": "missions",
+      "to": "reward",
+      "rect": [
+        300,
+        360,
+        360,
+        70
+      ],
+      "certainty": "synthetic",
+      "evidence": [
+        "e000002",
+        "e000003",
+        "e000004"
+      ]
+    },
+    {
+      "id": "t003",
+      "from": "reward",
+      "to": "done",
+      "rect": [
+        300,
+        360,
+        360,
+        70
+      ],
+      "certainty": "synthetic",
+      "evidence": [
+        "e000004",
+        "e000005",
+        "e000006"
+      ]
+    }
+  ],
+  "success": {
+    "node": "done",
+    "description": "Reward received screen and balance 100",
+    "evidence": [
+      "e000006"
+    ]
+  },
+  "assumptions": [
+    "Author-specified synthetic hitboxes; not inferred from a recording."
+  ]
+}

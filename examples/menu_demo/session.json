@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "synthetic",
+  "status": "completed",
+  "goal": "Claim the mission reward once",
+  "completion_condition": "Reward received screen and balance 100",
+  "fps": 0.5,
+  "frame_count": 4,
+  "event_count": 7,
+  "clock": "Synthetic relative nanoseconds"
+}
